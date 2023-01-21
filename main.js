@@ -2,7 +2,7 @@ const displayList = ()=>{
     const todoList = document.querySelector(".to-do-list");
     todoList.innerHTML = "";    
     
-    todos.forEach(todo =>{
+    todos.forEach((todo) =>{
         let listElement = document.createElement("article");
         listElement.classList.add("list-items");
         listElement.innerHTML = `<input type="text" class="list-input" value="${todo.content}" readonly>
@@ -29,8 +29,6 @@ const displayList = ()=>{
                     input.classList.add("underlineList");
                 }
             }
-       
-
         })
         const deleteBtn = listElement.querySelector(".delete-btn");
             deleteBtn.addEventListener("click", e =>{
@@ -43,20 +41,28 @@ const displayList = ()=>{
             })
         const deleteLocalStorage = ()=>{
            todos = todos.filter(t => t.id != todo.id);
-           console.log(todos);
             localStorage.setItem("todosItem",JSON.stringify(todos))
         }
-        const editBtn = listElement.querySelector(".edit-btn");
-        editBtn.addEventListener("click", (e)=>{
-            const input = listElement.querySelector(".list-input");
-            input.removeAttribute("readonly");
-            input.focus();
-            input.addEventListener("blur", e =>{
-                input.setAttribute("readonly", true);
-                todo.content = e.target.value;
-                localStorage.setItem("todosItem",JSON.stringify(todos));
-                displayList();
+        const editBtn = document.querySelectorAll(".edit-btn");
+        const saveBtn = document.querySelector(".save-btn");
+            editBtn.forEach(btn =>{
+                btn.addEventListener("click",e=>{
+                    const id = e.target.dataset.id;
+                    let findItem = todos.find(item => item.id === id);
+                    enterInput.value = findItem.content;
+                    submitBtn.style.display = "none";
+                    saveBtn.style.display = "inline-block";
+                    let attr = document.createAttribute("data-id");
+                    attr.value = id;
+                    saveBtn.setAttributeNode(attr);
+    
+                })
             })
+        saveBtn.addEventListener("click",e =>{
+                let id = e.target.dataset.id;
+                let findItem = todos.find(item => item.id === id);
+                findItem.content = enterInput.value;
+                localStorage.setItem("todosItem",JSON.stringify(todos))
         })
     })
 }
@@ -66,14 +72,14 @@ const getLocalStorage = ()=>{
 }
 window.addEventListener("DOMContentLoaded",()=>{
    todos = getLocalStorage();
-   const todoForm = document.querySelector(".todo_form");
-   const inputSubmit = document.getElementById("enter");
-   todoForm.addEventListener("submit",event =>{
-    event.preventDefault();
-    if(inputSubmit.value !== ""){
-
+   enterInput = document.getElementById("enter");
+   submitBtn = document.querySelector(".btn");
+   editFlag = false;
+    submitBtn.addEventListener("click",e =>{
+    e.preventDefault();
+    if(enterInput.value !== ""){
         const todo = {
-            content: event.target.elements.content.value,
+            content: enterInput.value,
             done: false,
             id: new Date().getTime().toString(),
             createAt: new Date().getTime()
@@ -81,7 +87,7 @@ window.addEventListener("DOMContentLoaded",()=>{
         todos.push(todo);
         localStorage.setItem("todosItem",JSON.stringify(todos));
         //Form reset
-        event.target.reset();
+        enterInput.value = "";
         displayList();
     }
    })
